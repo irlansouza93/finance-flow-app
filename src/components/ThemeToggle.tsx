@@ -1,39 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ThemeToggleProps {
   className?: string;
 }
 
 export function ThemeToggle({ className = '' }: ThemeToggleProps) {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-
-  // Verifica o tema salvo ou preferência do sistema ao inicializar
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  // Usa o hook personalizado para acessar o contexto de tema
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <button 

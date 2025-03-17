@@ -1,122 +1,65 @@
-# Expense Tracker SaaS - Controle Financeiro Pessoal
+# Finance Flow App
 
-Um aplicativo web para controle de finanças pessoais, desenvolvido com React, TypeScript e Tailwind CSS.
+Aplicação de controle financeiro pessoal desenvolvida com React e TypeScript.
 
-## 📋 Visão Geral
+## Sobre o Projeto
 
-Este aplicativo de controle financeiro permite aos usuários:
+O Finance Flow é uma aplicação web para gestão financeira pessoal que permite aos usuários controlarem suas despesas, receitas, orçamentos e metas financeiras. Com uma interface moderna e amigável, o aplicativo oferece diversas ferramentas para visualização e análise de dados financeiros.
 
-- Visualizar um painel com resumo das finanças pessoais
-- Acompanhar despesas e receitas
-- Gerenciar orçamentos por categorias
-- Definir e acompanhar metas de economia
-- Acessar conteúdo educacional sobre finanças
-- Interface de chat para assistência
+## Funcionalidades
 
-## 🚀 Tecnologias Utilizadas
+- **Visão Geral**: Dashboard com resumo financeiro, gráficos e transações recentes
+- **Renda**: Controle de fontes de receita com categorização
+- **Despesas**: Acompanhamento detalhado de gastos com gráficos por categoria
+- **Orçamento**: Definição de limites de gastos por categoria com acompanhamento visual
+- **Metas**: Criação e acompanhamento de objetivos financeiros
+- **Cartões de Crédito**: Gestão de cartões e faturas
+- **Modo Escuro**: Suporte a tema claro e escuro
 
-- [React](https://reactjs.org/) - Biblioteca JavaScript para construção da interface
-- [TypeScript](https://www.typescriptlang.org/) - Superset tipado de JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitário
-- [React Router DOM](https://reactrouter.com/) - Roteamento para aplicações React
-- [Recharts](https://recharts.org/) - Biblioteca de gráficos para React
-- [Framer Motion](https://www.framer.com/motion/) - Biblioteca para animações
-- [Lucide React](https://lucide.dev/) - Ícones para React
-- [React Hot Toast](https://react-hot-toast.com/) - Notificações toast para React
-- [Vite](https://vitejs.dev/) - Ferramenta de build e servidor de desenvolvimento
+## Tecnologias Utilizadas
 
-## 💻 Pré-requisitos
+- React
+- TypeScript
+- Tailwind CSS
+- Recharts (para visualização de dados)
+- Context API (para gerenciamento de estado)
+- React Router
 
-- Node.js (versão recomendada: 16.x ou superior)
-- npm ou yarn
-
-## 🔧 Instalação
+## Instalação e Uso
 
 1. Clone o repositório:
 ```bash
-git clone <url-do-repositorio>
-cd expense-tracker-saas
+git clone https://github.com/irlansouza93/finance-flow-app.git
+cd finance-flow-app
 ```
 
 2. Instale as dependências:
 ```bash
 npm install
-# ou
-yarn install
 ```
 
-3. Inicie o servidor de desenvolvimento:
+3. Execute a aplicação:
 ```bash
 npm run dev
-# ou
-yarn dev
 ```
 
-4. Acesse o aplicativo em seu navegador:
+4. Acesse o aplicativo no navegador:
 ```
-http://localhost:5173/
-```
-
-## 📱 Funcionalidades
-
-### Visão Geral
-- Dashboard com cards de resumo financeiro
-- Visualização de transações recentes
-- Progresso do orçamento mensal
-
-### Despesas
-- Registro e categorização de despesas
-- Histórico de transações
-- Análise de gastos por categoria
-
-### Orçamento
-- Definição de limites por categoria
-- Acompanhamento do progresso do orçamento
-- Alertas de limite excedido
-
-### Metas
-- Criação de metas de economia
-- Acompanhamento do progresso das metas
-- Datas de prazo e valores alvo
-
-### Educação
-- Conteúdo educacional sobre finanças pessoais
-- Dicas para economizar e investir
-
-### Chat
-- Assistente virtual para dúvidas financeiras
-- Suporte ao usuário
-
-## 🛠️ Estrutura do Projeto
-
-```
-src/
-├── components/     # Componentes reutilizáveis
-├── layouts/        # Layouts da aplicação
-├── pages/          # Páginas principais
-├── routes/         # Configuração de rotas
-├── styles/         # Estilos globais e customizações
-├── App.tsx         # Componente raiz da aplicação
-├── main.tsx        # Ponto de entrada da aplicação
-└── types.ts        # Definições de tipos
+http://localhost:5173
 ```
 
-## 📦 Construção para Produção
+## Estrutura do Projeto
 
-Para criar uma versão otimizada para produção, execute:
+- `/src/components`: Componentes reutilizáveis
+- `/src/pages`: Páginas da aplicação
+- `/src/context`: Contextos para gerenciamento de estado
+- `/src/types`: Definições de tipos TypeScript
+- `/src/routes`: Configuração de rotas
 
-```bash
-npm run build
-# ou
-yarn build
-```
+## Contribuição
 
-Os arquivos compilados estarão disponíveis na pasta `dist/`.
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
 
-## 🤝 Contribuindo
+## Licença
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir um issue ou enviar um pull request.
-
-## 📄 Licença
-
-Este projeto está licenciado sob a [MIT License](LICENSE). 
+Este projeto está licenciado sob a Licença MIT. 

@@ -4,6 +4,7 @@ import {
   Send, Sparkles, Bot, User, Clock, ArrowRight, Lightbulb, PieChart, 
   Wallet, RefreshCw, ShieldCheck, BarChart, HelpCircle, Download, X
 } from 'lucide-react';
+import { ThemeDemo } from '../components/ThemeDemo';
 
 interface Message {
   id: string;
@@ -230,8 +231,8 @@ export function Chat() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Chat IA
-          </h2>
+          Chat IA
+        </h2>
           <div className="flex items-center gap-3">
             <div className="flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
               <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-2 animate-pulse"></div>
@@ -433,6 +434,11 @@ export function Chat() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Adicionar o componente ThemeDemo no final da página */}
+        <div className="mb-6 mt-8">
+          <ThemeDemo />
         </div>
       </div>
     </div>

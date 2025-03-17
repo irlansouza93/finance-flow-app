@@ -154,27 +154,27 @@ export function OverviewCards() {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card
+      <Card
           title="Renda Total"
           value={formatCurrency(summary.totalIncome)}
           icon={<DollarSign className="w-7 h-7 text-white" />}
           iconBg="bg-green-500"
           trend={`${percentVariation > 0 ? '+' : ''}${percentVariation}% vs. último mês`}
           trendIcon={<ArrowUpRight className="w-4 h-4" />}
-          trendColor="text-green-500"
+        trendColor="text-green-500"
           miniChart={<MiniChart data={incomeData} increasing={true} />}
           actionLabel="Adicionar Renda"
           actionIcon={<Plus className="w-3.5 h-3.5" />}
           onActionClick={() => setShowIncomeModal(true)}
-        />
-        <Card
-          title="Despesas"
+      />
+      <Card
+        title="Despesas"
           value={formatCurrency(summary.fixedExpenses + summary.variableExpenses)}
           icon={<ShoppingCart className="w-7 h-7 text-white" />}
           iconBg="bg-red-500"
-          trend="-3% vs. último mês"
+        trend="-3% vs. último mês"
           trendIcon={<ArrowDownRight className="w-4 h-4" />}
-          trendColor="text-red-500"
+        trendColor="text-red-500"
           miniChart={<MiniChart data={expenseData} increasing={false} />}
           secondaryInfo={
             <div className="mt-2 flex justify-between text-xs">
@@ -188,24 +188,24 @@ export function OverviewCards() {
               </div>
             </div>
           }
-        />
-        <Card
+      />
+      <Card
           title="Dinheiro Restante"
           value={formatCurrency(summary.remainingMoney)}
           icon={<Wallet className="w-7 h-7 text-white" />}
           iconBg="bg-blue-500"
           trend={`${Math.round((summary.remainingMoney / summary.totalIncome) * 100)}% da renda`}
           trendIcon={<ArrowUpRight className="w-4 h-4" />}
-          trendColor="text-blue-500"
+        trendColor="text-blue-500"
           miniChart={<MiniChart data={budgetData} increasing={true} />}
-        />
-        <Card
+      />
+      <Card
           title="Saldo Total"
           value={formatCurrency(summary.totalBalance)}
           icon={<PiggyBank className="w-7 h-7 text-white" />}
           iconBg="bg-purple-500"
           trend="+15% este mês"
-          trendColor="text-purple-500"
+        trendColor="text-purple-500"
           showProgressCircle={true}
           miniChart={<MiniChart data={savingsData} increasing={true} />}
         />
@@ -404,7 +404,7 @@ function Card({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">{title}</h3>
         <div className={`p-2 ${iconBg} rounded-lg shadow-sm`}>
-          {icon}
+        {icon}
         </div>
       </div>
       
