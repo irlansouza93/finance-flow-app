@@ -7,7 +7,6 @@ const routeNames: Record<string, string> = {
   expenses: 'Despesas',
   budget: 'Orçamento',
   goals: 'Metas',
-  education: 'Educação',
   chat: 'Chat IA',
 };
 

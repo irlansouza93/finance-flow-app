@@ -14,7 +14,6 @@ const Income = lazy(() => import('../pages/Income.tsx').then(module => ({ defaul
 const Expenses = lazy(() => import('../pages/Expenses.tsx').then(module => ({ default: module.Expenses })));
 const Budget = lazy(() => import('../pages/Budget.tsx').then(module => ({ default: module.Budget })));
 const Goals = lazy(() => import('../pages/Goals.tsx').then(module => ({ default: module.Goals })));
-const Education = lazy(() => import('../pages/Education.tsx').then(module => ({ default: module.Education })));
 const Chat = lazy(() => import('../pages/Chat.tsx').then(module => ({ default: module.Chat })));
 const CreditCards = lazy(() => import('../pages/CreditCards').then(module => ({ default: module.CreditCards })));
 
@@ -29,7 +28,6 @@ export function AppRoutes() {
         <Route path="/credit-cards" element={<CreditCards />} />
         <Route path="/budget" element={<Budget />} />
         <Route path="/goals" element={<Goals />} />
-        <Route path="/education" element={<Education />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>
     </Suspense>
