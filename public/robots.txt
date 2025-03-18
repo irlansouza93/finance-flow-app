@@ -1,0 +1,6 @@
+# robots.txt for FinanceFlow
+
+User-agent: *
+Allow: /
+
+Sitemap: https://financeflow.app/sitemap.xml 

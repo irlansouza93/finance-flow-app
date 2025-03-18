@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Transaction, IncomeSource, BudgetCategory, SavingsGoal, CreditCard, FinancialSummary, Notification } from '../types';
 
-// Mock data (em produção isso seria carregado de uma API)
+// # Importação de dados mockados (em produção isso seria carregado de uma API)
 import { 
   mockTransactions, 
   mockIncomes, 
@@ -11,41 +11,50 @@ import {
   mockNotifications
 } from '../data/mockData';
 
+/**
+ * # Interface do Contexto Financeiro
+ * Define todos os dados financeiros e métodos disponíveis no contexto
+ */
 interface FinanceContextType {
-  // Dados
-  transactions: Transaction[];
-  incomeSources: IncomeSource[];
-  budgetCategories: BudgetCategory[];
-  savingsGoals: SavingsGoal[];
-  creditCards: CreditCard[];
-  notifications: Notification[];
-  summary: FinancialSummary;
-  
-  // Funções para atualizar dados
+  // # Dados financeiros
+  transactions: Transaction[];         // # Lista de transações
+  incomeSources: IncomeSource[];       // # Lista de fontes de renda
+  budgetCategories: BudgetCategory[];  // # Lista de categorias de orçamento
+  savingsGoals: SavingsGoal[];         // # Lista de metas de economia
+  creditCards: CreditCard[];           // # Lista de cartões de crédito
+  notifications: Notification[];       // # Lista de notificações
+  summary: FinancialSummary;           // # Resumo financeiro
+
+  // # Funções para gerenciar transações
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   updateTransaction: (transaction: Transaction) => void;
   deleteTransaction: (id: string) => void;
   
+  // # Funções para gerenciar fontes de renda
   addIncome: (income: Omit<IncomeSource, 'id'>) => void;
   updateIncome: (income: IncomeSource) => void;
   deleteIncome: (id: string) => void;
   
+  // # Funções para gerenciar cartões de crédito
   addCreditCard: (card: Omit<CreditCard, 'id'>) => void;
   updateCreditCard: (card: CreditCard) => void;
   deleteCreditCard: (id: string) => void;
   
+  // # Funções para gerenciar categorias de orçamento
   addBudgetCategory: (category: Omit<BudgetCategory, 'id'>) => void;
   updateBudgetCategory: (category: BudgetCategory) => void;
   deleteBudgetCategory: (id: string) => void;
   
+  // # Funções para gerenciar metas de economia
   addSavingsGoal: (goal: Omit<SavingsGoal, 'id'>) => void;
   updateSavingsGoal: (goal: SavingsGoal) => void;
   deleteSavingsGoal: (id: string) => void;
   
+  // # Funções para gerenciar notificações
   markNotificationAsRead: (id: string) => void;
   deleteNotification: (id: string) => void;
   
-  // Funções de utilidade
+  // # Funções utilitárias
   recalculateSummary: () => void;
   getTransactionsByCardId: (cardId: string) => Transaction[];
   getCurrentBillingCycleForCard: (cardId: string) => { 
@@ -56,7 +65,7 @@ interface FinanceContextType {
   } | null;
 }
 
-// Valor default para o contexto
+// # Valor padrão para o contexto (implementações vazias)
 const defaultContext: FinanceContextType = {
   transactions: [],
   incomeSources: [],
@@ -95,19 +104,26 @@ const defaultContext: FinanceContextType = {
   getCurrentBillingCycleForCard: () => null
 };
 
-// Criação do contexto
+// # Criação do contexto de finanças
 const FinanceContext = createContext<FinanceContextType>(defaultContext);
 
-// Hook personalizado para usar o contexto
+/**
+ * # Hook personalizado para acessar o contexto financeiro
+ * Facilita o uso do contexto em componentes
+ */
 export const useFinance = () => useContext(FinanceContext);
 
-// Provider component
+// # Props do Provider
 interface FinanceProviderProps {
   children: ReactNode;
 }
 
+/**
+ * # Componente Provider para o contexto financeiro
+ * Gerencia todos os estados e funções relacionados às finanças
+ */
 export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) => {
-  // Estados para os diferentes tipos de dados
+  // # Estados para os diferentes tipos de dados financeiros
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions || []);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(mockIncomes || []);
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(mockBudgets || []);
@@ -124,10 +140,12 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     pendingBills: 0
   });
 
-  // Função para gerar um ID único
+  /**
+   * # Função para gerar ID único para novos registros
+   */
   const generateId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Funções para gerenciar transações
+  // # Funções para gerenciar transações
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction = { ...transaction, id: generateId() };
     setTransactions(prev => [...prev, newTransaction]);
@@ -143,7 +161,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setTransactions(prev => prev.filter(item => item.id !== id));
   };
 
-  // Funções para gerenciar fontes de renda
+  // # Funções para gerenciar fontes de renda
   const addIncome = (income: Omit<IncomeSource, 'id'>) => {
     const newIncome = { ...income, id: generateId() };
     setIncomeSources(prev => [...prev, newIncome]);
@@ -159,7 +177,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setIncomeSources(prev => prev.filter(item => item.id !== id));
   };
 
-  // Funções para gerenciar cartões de crédito
+  // # Funções para gerenciar cartões de crédito
   const addCreditCard = (card: Omit<CreditCard, 'id'>) => {
     const newCard = { ...card, id: generateId() };
     setCreditCards(prev => [...prev, newCard]);
@@ -175,7 +193,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setCreditCards(prev => prev.filter(item => item.id !== id));
   };
 
-  // Funções para gerenciar categorias de orçamento
+  // # Funções para gerenciar categorias de orçamento
   const addBudgetCategory = (category: Omit<BudgetCategory, 'id'>) => {
     const newCategory = { ...category, id: generateId() };
     setBudgetCategories(prev => [...prev, newCategory]);
@@ -191,7 +209,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setBudgetCategories(prev => prev.filter(item => item.id !== id));
   };
 
-  // Funções para gerenciar metas de economia
+  // # Funções para gerenciar metas de economia
   const addSavingsGoal = (goal: Omit<SavingsGoal, 'id'>) => {
     const newGoal = { ...goal, id: generateId() };
     setSavingsGoals(prev => [...prev, newGoal]);
@@ -207,7 +225,7 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setSavingsGoals(prev => prev.filter(item => item.id !== id));
   };
 
-  // Funções para gerenciar notificações
+  // # Funções para gerenciar notificações
   const markNotificationAsRead = (id: string) => {
     setNotifications(prev => 
       prev.map(item => item.id === id ? { ...item, read: true } : item)
@@ -218,29 +236,39 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     setNotifications(prev => prev.filter(item => item.id !== id));
   };
 
-  // Função para recalcular o resumo financeiro
+  /**
+   * # Função para recalcular o resumo financeiro
+   * Atualiza todos os valores do resumo com base nas transações e fontes de renda
+   */
   const recalculateSummary = () => {
+    // # Calcula receita total somando todas as fontes de renda
     const totalIncome = incomeSources.reduce((sum, source) => sum + source.amount, 0);
     
+    // # Calcula despesas fixas somando transações do tipo despesa fixa
     const fixedExpenses = transactions
       .filter(t => t.type === 'expense' && t.expenseType === 'fixed')
       .reduce((sum, t) => sum + t.amount, 0);
-      
+    
+    // # Calcula despesas variáveis somando transações do tipo despesa variável  
     const variableExpenses = transactions
       .filter(t => t.type === 'expense' && t.expenseType === 'variable')
       .reduce((sum, t) => sum + t.amount, 0);
-      
+    
+    // # Calcula despesas de cartão de crédito  
     const creditCardExpenses = transactions
       .filter(t => t.type === 'expense' && t.paymentMethod === 'credit')
       .reduce((sum, t) => sum + t.amount, 0);
-      
+    
+    // # Calcula contas pendentes  
     const pendingBills = transactions
       .filter(t => t.type === 'expense' && t.paymentStatus === 'pending')
       .reduce((sum, t) => sum + t.amount, 0);
     
+    // # Calcula dinheiro restante (receita - despesas)
     const remainingMoney = totalIncome - fixedExpenses - variableExpenses;
     const totalBalance = remainingMoney;
     
+    // # Atualiza o estado do resumo financeiro
     setSummary({
       totalIncome,
       fixedExpenses,
@@ -252,47 +280,57 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     });
   };
 
-  // Função para obter transações de um cartão específico
+  // # Efeito para recalcular o resumo quando os dados relevantes mudarem
+  useEffect(() => {
+    recalculateSummary();
+  }, [transactions, incomeSources]);
+
+  /**
+   * # Função para obter transações de um cartão específico
+   */
   const getTransactionsByCardId = (cardId: string) => {
     return transactions.filter(t => t.creditCardId === cardId);
   };
 
-  // Função para obter informações do ciclo de faturamento atual de um cartão
+  /**
+   * # Função para obter o ciclo atual de faturamento de um cartão
+   * Calcula as datas de fechamento e vencimento atuais
+   */
   const getCurrentBillingCycleForCard = (cardId: string) => {
     const card = creditCards.find(c => c.id === cardId);
     if (!card) return null;
     
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
     
-    // Data de fechamento deste mês
-    const closeDate = new Date(currentYear, currentMonth, card.closingDay);
-    
-    // Se já passou a data de fechamento, o próximo fechamento é no mês seguinte
-    if (today > closeDate) {
-      closeDate.setMonth(closeDate.getMonth() + 1);
+    // # Determina a data de fechamento (atual ou próxima)
+    let closeDate = new Date(currentYear, currentMonth, card.closingDay);
+    if (now > closeDate) {
+      // Se a data de fechamento já passou este mês, avança para o próximo
+      closeDate = new Date(currentYear, currentMonth + 1, card.closingDay);
     }
     
-    // Data de vencimento
-    const dueDate = new Date(closeDate);
-    if (card.dueDay < card.closingDay) {
-      dueDate.setMonth(dueDate.getMonth() + 1);
+    // # Determina a data de vencimento com base na data de fechamento
+    let dueDate = new Date(currentYear, currentMonth, card.dueDay);
+    if (dueDate < closeDate) {
+      // Se a data de vencimento é antes da data de fechamento, avança para o próximo mês
+      dueDate = new Date(currentYear, currentMonth + 1, card.dueDay);
     }
-    dueDate.setDate(card.dueDay);
     
-    // Data de fechamento do ciclo anterior
+    // # Obtém o ciclo de faturamento anterior para saber quais transações incluir
     const prevCloseDate = new Date(closeDate);
     prevCloseDate.setMonth(prevCloseDate.getMonth() - 1);
     
-    // Transações deste ciclo (entre fechamento anterior e atual)
+    // # Filtra transações que estão entre o fechamento anterior e o atual
     const cycleTransactions = transactions.filter(t => {
-      if (t.creditCardId !== cardId) return false;
-      
-      const txDate = new Date(t.date);
-      return txDate > prevCloseDate && txDate <= closeDate;
+      const transDate = new Date(t.date);
+      return t.creditCardId === cardId && 
+             transDate >= prevCloseDate && 
+             transDate < closeDate;
     });
     
+    // # Calcula o valor total das transações no ciclo
     const totalAmount = cycleTransactions.reduce((sum, t) => sum + t.amount, 0);
     
     return {
@@ -303,44 +341,37 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     };
   };
 
-  // Efeito para recalcular o resumo sempre que houver mudanças nos dados
-  useEffect(() => {
-    recalculateSummary();
-  }, [transactions, incomeSources]);
-
-  // Valor fornecido pelo contexto
-  const value: FinanceContextType = {
-    transactions,
-    incomeSources,
-    budgetCategories,
-    savingsGoals,
-    creditCards,
-    notifications,
-    summary,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-    addIncome,
-    updateIncome,
-    deleteIncome,
-    addCreditCard,
-    updateCreditCard,
-    deleteCreditCard,
-    addBudgetCategory,
-    updateBudgetCategory,
-    deleteBudgetCategory,
-    addSavingsGoal,
-    updateSavingsGoal,
-    deleteSavingsGoal,
-    markNotificationAsRead,
-    deleteNotification,
-    recalculateSummary,
-    getTransactionsByCardId,
-    getCurrentBillingCycleForCard
-  };
-
+  // # Exporta todos os estados e funções através do Provider
   return (
-    <FinanceContext.Provider value={value}>
+    <FinanceContext.Provider value={{
+      transactions,
+      incomeSources,
+      budgetCategories,
+      savingsGoals,
+      creditCards,
+      notifications,
+      summary,
+      addTransaction,
+      updateTransaction,
+      deleteTransaction,
+      addIncome,
+      updateIncome,
+      deleteIncome,
+      addCreditCard,
+      updateCreditCard,
+      deleteCreditCard,
+      addBudgetCategory,
+      updateBudgetCategory,
+      deleteBudgetCategory,
+      addSavingsGoal,
+      updateSavingsGoal,
+      deleteSavingsGoal,
+      markNotificationAsRead,
+      deleteNotification,
+      recalculateSummary,
+      getTransactionsByCardId,
+      getCurrentBillingCycleForCard
+    }}>
       {children}
     </FinanceContext.Provider>
   );

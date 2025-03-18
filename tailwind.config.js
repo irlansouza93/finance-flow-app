@@ -20,6 +20,19 @@ export default {
         gray: {
           750: '#2D3748',
         },
+        red: {
+          500: '#dc2626',
+        },
+        blue: {
+          500: '#2563eb',
+        },
+        purple: {
+          500: '#7e22ce',
+        },
+        text: {
+          light: '#1F2937',
+          dark: '#F3F4F6',
+        },
       },
       animation: {
         'progress': 'progress 1s ease-in-out',

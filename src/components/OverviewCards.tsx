@@ -22,12 +22,22 @@ import {
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useFinance } from '../context/FinanceContext';
 
+/**
+ * # Interface para o componente MiniChart
+ * Define as propriedades do gráfico pequeno usado nos cards
+ */
 interface MiniChartProps {
-  data: number[];
-  increasing: boolean;
+  data: number[];          // # Array de valores para o gráfico
+  increasing: boolean;     // # Se true, usa cor verde; se false, usa cor vermelha
 }
 
+/**
+ * # Componente MiniChart
+ * Renderiza um gráfico de barras simples para mostrar tendências
+ * A altura das barras é calculada proporcionalmente aos valores
+ */
 function MiniChart({ data, increasing }: MiniChartProps) {
+  // # Encontra os valores máximo e mínimo para calcular a escala
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
@@ -35,6 +45,7 @@ function MiniChart({ data, increasing }: MiniChartProps) {
   return (
     <div className="flex items-end h-10 space-x-0.5">
       {data.map((value, i) => {
+        // # Calcula altura proporcional da barra (mínimo 15%)
         const height = range === 0 ? 50 : ((value - min) / range) * 100;
         return (
           <div 
@@ -48,19 +59,29 @@ function MiniChart({ data, increasing }: MiniChartProps) {
   );
 }
 
+/**
+ * # Componente BalanceChart
+ * Renderiza um gráfico de pizza mostrando a distribuição entre
+ * renda e despesas (fixas e variáveis)
+ */
 function BalanceChart({ totalIncome, fixedExpenses, variableExpenses }: { 
   totalIncome: number, 
   fixedExpenses: number, 
   variableExpenses: number 
 }) {
+  // # Dados para o gráfico de pizza com cores específicas para cada categoria
   const balanceData = [
     { name: 'Renda', value: totalIncome, color: '#10B981' },  // Verde
     { name: 'Despesas Fixas', value: fixedExpenses, color: '#F87171' }, // Vermelho
     { name: 'Despesas Variáveis', value: variableExpenses, color: '#FBBF24' } // Amarelo
   ];
   
+  // # Soma total para cálculo de percentuais
   const total = totalIncome + fixedExpenses + variableExpenses;
   
+  /**
+   * # Formata valores monetários no padrão brasileiro (R$)
+   */
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -72,6 +93,7 @@ function BalanceChart({ totalIncome, fixedExpenses, variableExpenses }: {
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 border border-gray-100 dark:border-gray-700">
       <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">Balanço Financeiro</h3>
       
+      {/* # Container do gráfico de pizza */}
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <RechartsPieChart>
@@ -85,16 +107,19 @@ function BalanceChart({ totalIncome, fixedExpenses, variableExpenses }: {
               dataKey="value"
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
             >
+              {/* # Células do gráfico com cores personalizadas */}
               {balanceData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
+            {/* # Tooltip para mostrar valores ao passar o mouse */}
             <Tooltip formatter={(value) => formatCurrency(Number(value))} />
             <Legend verticalAlign="bottom" />
           </RechartsPieChart>
         </ResponsiveContainer>
       </div>
       
+      {/* # Sumário com valores e percentuais abaixo do gráfico */}
       <div className="mt-4 grid grid-cols-3 gap-2">
         <div className="text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">Renda</p>
@@ -116,17 +141,26 @@ function BalanceChart({ totalIncome, fixedExpenses, variableExpenses }: {
   );
 }
 
+/**
+ * # Componente principal OverviewCards
+ * Exibe os cards com resumo financeiro na dashboard
+ */
 export function OverviewCards() {
+  // # Obtém dados financeiros do contexto
   const { summary, transactions, incomeSources } = useFinance();
+  
+  // # Estado para controlar a exibição do modal de adicionar renda
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   
-  // Dados para as mini-charts (poderiam ser calculados com base no histórico)
+  // # Dados de exemplo para os mini-gráficos (seriam calculados com base no histórico)
   const incomeData = [30, 35, 40, 38, 42, 45, 48];
   const expenseData = [25, 28, 24, 26, 22, 23, 22];
   const budgetData = [35, 32, 38, 40, 42, 41, 44];
   const savingsData = [10, 15, 20, 28, 35, 45, 65];
   
-  // Formatação de moeda
+  /**
+   * # Formata valores monetários no padrão brasileiro (R$)
+   */
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -134,14 +168,14 @@ export function OverviewCards() {
     }).format(value);
   };
   
-  // Cálculo de percentual de variação (mockado por enquanto)
+  // # Percentual de variação (simulado por enquanto)
   const percentVariation = 8;
   
-  // Obter despesas fixas e variáveis
+  // # Obtém as principais despesas fixas e variáveis para exibição
   const fixedExpenses = transactions
     .filter(t => t.type === 'expense' && t.expenseType === 'fixed')
-    .sort((a, b) => b.amount - a.amount)
-    .slice(0, 4);
+    .sort((a, b) => b.amount - a.amount)  // # Ordena por valor (maior primeiro)
+    .slice(0, 4);  // # Limita aos 4 maiores
     
   const variableExpenses = transactions
     .filter(t => t.type === 'expense' && t.expenseType === 'variable')
@@ -161,7 +195,7 @@ export function OverviewCards() {
           iconBg="bg-green-500"
           trend={`${percentVariation > 0 ? '+' : ''}${percentVariation}% vs. último mês`}
           trendIcon={<ArrowUpRight className="w-4 h-4" />}
-        trendColor="text-green-500"
+          trendColor="text-green-700 dark:text-green-300"
           miniChart={<MiniChart data={incomeData} increasing={true} />}
           actionLabel="Adicionar Renda"
           actionIcon={<Plus className="w-3.5 h-3.5" />}
@@ -172,19 +206,19 @@ export function OverviewCards() {
           value={formatCurrency(summary.fixedExpenses + summary.variableExpenses)}
           icon={<ShoppingCart className="w-7 h-7 text-white" />}
           iconBg="bg-red-500"
-        trend="-3% vs. último mês"
+          trend="-3% vs. último mês"
           trendIcon={<ArrowDownRight className="w-4 h-4" />}
-        trendColor="text-red-500"
+          trendColor="text-red-700 dark:text-red-300"
           miniChart={<MiniChart data={expenseData} increasing={false} />}
           secondaryInfo={
             <div className="mt-2 flex justify-between text-xs">
               <div className="flex items-center">
                 <div className="w-2 h-2 rounded-full bg-red-400 mr-1"></div>
-                <span className="text-gray-500 dark:text-gray-400">Fixas: {formatCurrency(summary.fixedExpenses)}</span>
+                <span className="text-gray-700 dark:text-gray-300">Fixas: {formatCurrency(summary.fixedExpenses)}</span>
               </div>
               <div className="flex items-center">
                 <div className="w-2 h-2 rounded-full bg-yellow-400 mr-1"></div>
-                <span className="text-gray-500 dark:text-gray-400">Variáveis: {formatCurrency(summary.variableExpenses)}</span>
+                <span className="text-gray-700 dark:text-gray-300">Variáveis: {formatCurrency(summary.variableExpenses)}</span>
               </div>
             </div>
           }
@@ -196,7 +230,7 @@ export function OverviewCards() {
           iconBg="bg-blue-500"
           trend={`${Math.round((summary.remainingMoney / summary.totalIncome) * 100)}% da renda`}
           trendIcon={<ArrowUpRight className="w-4 h-4" />}
-        trendColor="text-blue-500"
+          trendColor="text-blue-700 dark:text-blue-300"
           miniChart={<MiniChart data={budgetData} increasing={true} />}
       />
       <Card
@@ -205,7 +239,7 @@ export function OverviewCards() {
           icon={<PiggyBank className="w-7 h-7 text-white" />}
           iconBg="bg-purple-500"
           trend="+15% este mês"
-        trendColor="text-purple-500"
+          trendColor="text-purple-700 dark:text-purple-300"
           showProgressCircle={true}
           miniChart={<MiniChart data={savingsData} increasing={true} />}
         />

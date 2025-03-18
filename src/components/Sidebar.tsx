@@ -87,6 +87,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           <button 
             onClick={() => setShowNotifications(true)}
             className="relative p-2 hover:bg-gray-700 rounded-full transition-colors"
+            aria-label="Abrir notificações"
           >
             <Bell className="w-5 h-5 text-gray-200" />
             <span className="absolute top-0 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -171,7 +172,10 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           
           <div className="flex px-2 space-x-2">
             <ThemeToggle className="flex-1" />
-            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            <button 
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              aria-label="Configurações"
+            >
               <Settings className="w-4 h-4" />
               <span className="text-sm">Ajustes</span>
             </button>
@@ -188,6 +192,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
               <button 
                 onClick={() => setShowNotifications(false)}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                aria-label="Fechar notificações"
               >
                 <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
