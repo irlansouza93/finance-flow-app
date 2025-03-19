@@ -4,6 +4,7 @@ import {
   Wallet,
   Calculator,
   PiggyBank,
+  GraduationCap,
   MessageSquareText,
   Trophy,
   TrendingUp,
@@ -66,7 +67,6 @@ interface SidebarProps {
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   
   const notifications = [
     { id: 1, title: 'Orçamento atingido', message: 'Categoria "Lazer" ultrapassou 90% do limite', time: '2 min atrás' },
@@ -75,107 +75,107 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   ];
 
   return (
-    <div className={clsx("h-screen bg-gradient-to-b from-blue-600 to-blue-800 text-white dark:from-gray-800 dark:to-gray-900 flex flex-col transition-all duration-300",
-      collapsed ? "w-20" : "w-64"
-    )}>
-      <div className="flex items-center justify-between px-4 mb-8">
-        <div className="flex items-center">
-          <div className="p-1.5 bg-blue-500 rounded-lg">
-            <TrendingUp className="w-6 h-6 text-white" />
-          </div>
-          <span className="ml-3 text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">FinanceFlow</span>
-        </div>
-        <button 
-          onClick={() => setShowNotifications(true)}
-          className="relative p-2 hover:bg-gray-700 rounded-full transition-colors"
-          aria-label="Abrir notificações"
-        >
-          <Bell className="w-5 h-5 text-gray-200" />
-          <span className="absolute top-0 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto py-4 px-3">
-        <div className="mt-1 mb-2 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-          Financeiro
-        </div>
-        <NavItem
-          icon={<LayoutDashboard className="w-5 h-5" />}
-          label="Visão Geral"
-          active={activeSection === 'overview'}
-          onClick={() => onSectionChange('overview')}
-        />
-        <NavItem
-          icon={<DollarSign className="w-5 h-5" />}
-          label="Renda"
-          active={activeSection === 'income'}
-          onClick={() => onSectionChange('income')}
-        />
-        <NavItem
-          icon={<Receipt className="w-5 h-5" />}
-          label="Despesas"
-          active={activeSection === 'expenses'}
-          onClick={() => onSectionChange('expenses')}
-        />
-        <NavItem
-          icon={<CreditCard className="w-5 h-5" />}
-          label="Cartões de Crédito"
-          active={activeSection === 'credit-cards'}
-          onClick={() => onSectionChange('credit-cards')}
-        />
-        <NavItem
-          icon={<Wallet className="w-5 h-5" />}
-          label="Orçamento"
-          active={activeSection === 'budget'}
-          onClick={() => onSectionChange('budget')}
-          badge={1}
-        />
-        <NavItem
-          icon={<PiggyBank className="w-5 h-5" />}
-          label="Metas"
-          active={activeSection === 'goals'}
-          onClick={() => onSectionChange('goals')}
-        />
-
-        <div className="mt-6 mb-2 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-          Suporte
-        </div>
-        <NavItem
-          icon={<MessageSquareText className="w-5 h-5" />}
-          label="Chat IA"
-          active={activeSection === 'chat'}
-          onClick={() => onSectionChange('chat')}
-        />
-      </div>
-      
-      <div className="mt-auto border-t border-gray-700 pt-4 space-y-4">
-        <div className="bg-gray-700 dark:bg-gray-800 rounded-xl shadow-inner p-4">
-          <div className="flex items-center mb-3">
-            <Trophy className="w-5 h-5 text-yellow-400" />
-            <span className="ml-2 font-medium">Nível 3</span>
-            <div className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-500 p-1 bg-gray-800 dark:bg-gray-900">
-              <span className="text-xs font-semibold">JS</span>
+    <>
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-800 dark:bg-gray-900 text-white py-6 px-4 flex flex-col border-r border-gray-700 shadow-lg z-10">
+        <div className="flex items-center justify-between px-4 mb-8">
+          <div className="flex items-center">
+            <div className="p-1.5 bg-blue-500 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
             </div>
+            <span className="ml-3 text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">FinanceFlow</span>
           </div>
-          <p className="text-sm text-gray-300 mb-2">Economista Iniciante</p>
-          <div className="w-full bg-gray-800 dark:bg-gray-900 rounded-full h-2.5">
-            <div className="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style={{ width: '60%' }} />
-          </div>
-          <p className="text-xs text-gray-400 mt-2">350 pontos para o próximo nível</p>
-        </div>
-        
-        <div className="flex px-2 space-x-2">
-          <ThemeToggle className="flex-1" />
           <button 
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            aria-label="Configurações"
+            onClick={() => setShowNotifications(true)}
+            className="relative p-2 hover:bg-gray-700 rounded-full transition-colors"
+            aria-label="Abrir notificações"
           >
-            <Settings className="w-4 h-4" />
-            <span className="text-sm">Ajustes</span>
+            <Bell className="w-5 h-5 text-gray-200" />
+            <span className="absolute top-0 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
-      </div>
 
+        <nav className="flex-1 space-y-3 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          <div className="mb-2 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Principal
+          </div>
+          <NavItem
+            icon={<LayoutDashboard className="w-5 h-5" />}
+            label="Visão Geral"
+            active={activeSection === 'overview'}
+            onClick={() => onSectionChange('overview')}
+          />
+          <NavItem
+            icon={<DollarSign className="w-5 h-5" />}
+            label="Renda"
+            active={activeSection === 'income'}
+            onClick={() => onSectionChange('income')}
+          />
+          <NavItem
+            icon={<Receipt className="w-5 h-5" />}
+            label="Despesas"
+            active={activeSection === 'expenses'}
+            onClick={() => onSectionChange('expenses')}
+          />
+          <NavItem
+            icon={<CreditCard className="w-5 h-5" />}
+            label="Cartões de Crédito"
+            active={activeSection === 'credit-cards'}
+            onClick={() => onSectionChange('credit-cards')}
+          />
+          <NavItem
+            icon={<Wallet className="w-5 h-5" />}
+            label="Orçamento"
+            active={activeSection === 'budget'}
+            onClick={() => onSectionChange('budget')}
+            badge={1}
+          />
+          <NavItem
+            icon={<PiggyBank className="w-5 h-5" />}
+            label="Metas"
+            active={activeSection === 'goals'}
+            onClick={() => onSectionChange('goals')}
+          />
+
+          <div className="mt-6 mb-2 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Suporte
+          </div>
+          <NavItem
+            icon={<MessageSquareText className="w-5 h-5" />}
+            label="Chat IA"
+            active={activeSection === 'chat'}
+            onClick={() => onSectionChange('chat')}
+          />
+        </nav>
+        
+        <div className="mt-auto border-t border-gray-700 pt-4 space-y-4">
+          <div className="bg-gray-700 dark:bg-gray-800 rounded-xl shadow-inner p-4">
+            <div className="flex items-center mb-3">
+              <Trophy className="w-5 h-5 text-yellow-400" />
+              <span className="ml-2 font-medium">Nível 3</span>
+              <div className="ml-auto flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-500 p-1 bg-gray-800 dark:bg-gray-900">
+                <span className="text-xs font-semibold">JS</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-300 mb-2">Economista Iniciante</p>
+            <div className="w-full bg-gray-800 dark:bg-gray-900 rounded-full h-2.5">
+              <div className="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style={{ width: '60%' }} />
+            </div>
+            <p className="text-xs text-gray-400 mt-2">350 pontos para o próximo nível</p>
+          </div>
+          
+          <div className="flex px-2 space-x-2">
+            <ThemeToggle className="flex-1" />
+            <button 
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              aria-label="Configurações"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-sm">Ajustes</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+      
       {/* Painel de notificações */}
       {showNotifications && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
@@ -213,6 +213,6 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
