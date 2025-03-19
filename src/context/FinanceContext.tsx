@@ -148,6 +148,37 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
   // # Funções para gerenciar transações
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction = { ...transaction, id: generateId() };
+    
+    // Lógica para processar pagamentos
+    if (transaction.type === 'expense') {
+      // Se for PIX, debitar do valor de renda
+      if (transaction.paymentMethod === 'pix') {
+        // Atualizar o totalBalance no resumo
+        setSummary(prev => ({
+          ...prev,
+          totalBalance: prev.totalBalance - transaction.amount,
+          remainingMoney: prev.remainingMoney - transaction.amount
+        }));
+      }
+      
+      // Se for cartão de crédito, debitar do limite do cartão
+      if (transaction.paymentMethod === 'credit' && transaction.creditCardId) {
+        const updatedCards = creditCards.map(card => {
+          if (card.id === transaction.creditCardId) {
+            // Atualizar saldo e limite disponível do cartão
+            return {
+              ...card,
+              currentBalance: card.currentBalance + transaction.amount,
+              availableLimit: card.limit - (card.currentBalance + transaction.amount)
+            };
+          }
+          return card;
+        });
+        
+        setCreditCards(updatedCards);
+      }
+    }
+    
     setTransactions(prev => [...prev, newTransaction]);
   };
 

@@ -172,7 +172,7 @@ export function Income() {
         
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium text-gray-700 dark:text-gray-300">Renda Recorrente</h3>
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">Renda Fixa</h3>
             <Repeat className="w-5 h-5 text-blue-500" />
           </div>
           <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">R$ {recurrentIncome.toFixed(2)}</p>

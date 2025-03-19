@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { PlusCircle, CalendarRange, Edit, Trash2, Download, Filter, AlertTriangle, ChevronDown, Check, X, Home, CreditCard, Tag } from 'lucide-react';
+import { PlusCircle, CalendarRange, Edit, Trash2, Download, Filter, AlertTriangle, ChevronDown, Check, X, Home, CreditCard, Tag, DollarSign, Repeat, Clock } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector } from 'recharts';
 import { useFinance } from '../context/FinanceContext';
-import type { Transaction } from '../types';
+import type { Transaction, CreditCard as CreditCardType } from '../types';
 
 // Dados de exemplo das transações com tipo de despesa (fixa ou variável)
 const transactions: Transaction[] = [
@@ -15,7 +15,8 @@ const transactions: Transaction[] = [
     date: '2024-03-15',
     type: 'expense',
     expenseType: 'variable',
-    recurrent: false
+    recurrent: false,
+    paymentMethod: 'pix'
   },
   {
     id: '2',
@@ -25,7 +26,8 @@ const transactions: Transaction[] = [
     date: '2024-03-15',
     type: 'expense',
     expenseType: 'variable',
-    recurrent: false
+    recurrent: false,
+    paymentMethod: 'cash'
   },
   {
     id: '3',
@@ -37,7 +39,8 @@ const transactions: Transaction[] = [
     expenseType: 'fixed',
     paymentStatus: 'paid',
     recurrent: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    paymentMethod: 'transfer'
   },
   {
     id: '4',
@@ -47,7 +50,9 @@ const transactions: Transaction[] = [
     date: '2024-03-14',
     type: 'expense',
     expenseType: 'variable',
-    recurrent: false
+    recurrent: false,
+    paymentMethod: 'credit',
+    creditCardId: '1'
   },
   {
     id: '5',
@@ -57,7 +62,9 @@ const transactions: Transaction[] = [
     date: '2024-03-10',
     type: 'expense',
     expenseType: 'variable',
-    recurrent: false
+    recurrent: false,
+    paymentMethod: 'credit',
+    creditCardId: '2'
   },
   {
     id: '6',
@@ -69,7 +76,8 @@ const transactions: Transaction[] = [
     expenseType: 'fixed',
     paymentStatus: 'paid',
     recurrent: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    paymentMethod: 'debit'
   },
   {
     id: '7',
@@ -81,7 +89,34 @@ const transactions: Transaction[] = [
     expenseType: 'fixed',
     paymentStatus: 'pending',
     recurrent: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    paymentMethod: 'pix'
+  }
+];
+
+// Dados de exemplo de cartões de crédito
+const creditCards: CreditCardType[] = [
+  {
+    id: '1',
+    name: 'Nubank',
+    lastDigits: '1234',
+    limit: 5000,
+    closingDay: 15,
+    dueDay: 22,
+    currentBalance: 1500,
+    availableLimit: 3500,
+    color: '#9C44DC'
+  },
+  {
+    id: '2',
+    name: 'Itaú',
+    lastDigits: '5678',
+    limit: 8000,
+    closingDay: 10,
+    dueDay: 17,
+    currentBalance: 2500,
+    availableLimit: 5500,
+    color: '#EC7000'
   }
 ];
 
@@ -146,6 +181,27 @@ const renderActiveShape = (props: any) => {
   );
 };
 
+// Função para obter o cartão de crédito pelo ID
+const getCreditCardById = (cardId: string) => {
+  return creditCards.find(card => card.id === cardId);
+};
+
+// Função para obter ícone do método de pagamento
+const getPaymentMethodIcon = (method?: string) => {
+  switch (method) {
+    case 'credit':
+      return <CreditCard className="w-4 h-4 text-red-500" />;
+    case 'debit':
+      return <CreditCard className="w-4 h-4 text-green-500" />;
+    case 'pix':
+      return <Tag className="w-4 h-4 text-blue-500 rotate-45" />;
+    case 'transfer':
+      return <Tag className="w-4 h-4 text-purple-500" />;
+    default:
+      return <DollarSign className="w-4 h-4 text-gray-500" />;
+  }
+};
+
 export function Expenses() {
   const {
     transactions,
@@ -158,11 +214,11 @@ export function Expenses() {
   
   const [dateFilter, setDateFilter] = useState('30');
   const [categoryFilter, setCategoryFilter] = useState('Todas');
-  const [expenseTypeFilter, setExpenseTypeFilter] = useState<'all' | 'fixed' | 'variable'>('all');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [chartType, setChartType] = useState<'all' | 'fixed' | 'variable'>('all');
-  const [animatedTotal, setAnimatedTotal] = useState(0);
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
   const [showNewExpenseModal, setShowNewExpenseModal] = useState(false);
+  const [animatedTotal, setAnimatedTotal] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const [formData, setFormData] = useState({
     description: '',
@@ -186,7 +242,7 @@ export function Expenses() {
   const filteredTransactions = transactions.filter(transaction => {
     if (transaction.type !== 'expense') return false;
     const categoryMatches = categoryFilter === 'Todas' || transaction.category === categoryFilter;
-    const typeMatches = expenseTypeFilter === 'all' || transaction.expenseType === expenseTypeFilter;
+    const typeMatches = typeFilter === 'all' || (typeFilter === 'fixed' && transaction.expenseType === 'fixed') || (typeFilter === 'variable' && transaction.expenseType === 'variable');
     return categoryMatches && typeMatches;
   });
   
@@ -312,7 +368,7 @@ export function Expenses() {
       {/* Cabeçalho com ações */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Controle de Despesas
+          Despesas
         </h2>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -321,15 +377,15 @@ export function Expenses() {
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
             >
-              <option value="7">Últimos 7 dias</option>
-              <option value="30">Últimos 30 dias</option>
+              <option value="30">Este mês</option>
               <option value="90">Últimos 3 meses</option>
-              <option value="365">Último ano</option>
+              <option value="180">Últimos 6 meses</option>
+              <option value="365">Este ano</option>
             </select>
             <CalendarRange className="absolute right-3 top-2.5 w-4 h-4 text-gray-500 dark:text-gray-400" />
           </div>
           <button 
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
             onClick={() => setShowNewExpenseModal(true)}
           >
             <PlusCircle className="w-5 h-5" />
@@ -338,211 +394,264 @@ export function Expenses() {
         </div>
       </div>
       
-      {/* Barra de progresso do orçamento */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center">
-            <h3 className="font-medium text-gray-700 dark:text-gray-300">Progresso do Orçamento Mensal</h3>
-            {isOverBudget && (
-              <div className="ml-2 bg-red-100 dark:bg-red-900 px-2 py-0.5 rounded-full flex items-center">
-                <AlertTriangle className="w-3 h-3 text-red-600 dark:text-red-400 mr-1" />
-                <span className="text-xs font-medium text-red-600 dark:text-red-400">Orçamento excedido</span>
-              </div>
-            )}
-            {isNearBudget && (
-              <div className="ml-2 bg-yellow-100 dark:bg-yellow-900 px-2 py-0.5 rounded-full flex items-center">
-                <AlertTriangle className="w-3 h-3 text-yellow-600 dark:text-yellow-400 mr-1" />
-                <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400">Próximo ao limite</span>
-              </div>
-            )}
+      {/* Resumo de despesas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">Despesas Totais</h3>
+            <DollarSign className="w-5 h-5 text-red-500" />
           </div>
-          <span className="text-sm font-medium">
-            <span className={`
-              ${isOverBudget ? 'text-red-600 dark:text-red-400' : 
-                isNearBudget ? 'text-yellow-600 dark:text-yellow-400' : 
-                'text-green-600 dark:text-green-400'}
-            `}>
-              R$ {animatedTotal.toFixed(2)}
-            </span>
-            <span className="text-gray-500 dark:text-gray-400"> / R$ {totalBudget.toFixed(2)}</span>
-          </span>
-        </div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div 
-            className={`h-full rounded-full transition-all duration-1000 ease-out ${
-              isOverBudget 
-                ? 'bg-gradient-to-r from-red-500 to-red-600' 
-                : isNearBudget
-                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
-                  : 'bg-gradient-to-r from-green-400 to-green-500'
-            }`}
-            style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
-          >
-            {budgetPercentage > 20 && (
-              <span className="absolute ml-4 text-xs font-bold text-white drop-shadow-md" style={{ lineHeight: '1rem' }}>
-                {budgetPercentage.toFixed(1)}%
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Tabela de transações */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Transações Recentes</h3>
-          <div className="flex gap-3">
-            <div className="relative">
-              <select 
-                className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-1.5 pl-3 pr-8 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-2 w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </div>
-            <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </button>
-            <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <Download className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </button>
-          </div>
+          <p className="text-3xl font-bold text-red-600 dark:text-red-400">R$ {animatedTotal.toFixed(2)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            {isOverBudget 
+              ? <span className="text-red-500 font-medium">Orçamento excedido em {(budgetPercentage - 100).toFixed(0)}%</span>
+              : `${budgetPercentage.toFixed(0)}% do orçamento utilizado`
+            }
+          </p>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categoria</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredTransactions.map((transaction, index) => (
-                <tr 
-                  key={transaction.id} 
-                  className={`
-                    ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-750'} 
-                    hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors
-                  `}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">Despesas Fixas</h3>
+            <Repeat className="w-5 h-5 text-blue-500" />
+          </div>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">R$ {totalFixedExpenses.toFixed(2)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            {Math.round((totalFixedExpenses / totalExpenses) * 100)}% das despesas totais
+          </p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">Despesas Variáveis</h3>
+            <Clock className="w-5 h-5 text-purple-500" />
+          </div>
+          <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">R$ {totalVariableExpenses.toFixed(2)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            {Math.round((totalVariableExpenses / totalExpenses) * 100)}% das despesas totais
+          </p>
+        </div>
+      </div>
+
+      {/* Gráfico e Tabela */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+          <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-4">Distribuição de Despesas</h3>
+          
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  data={
+                    typeFilter === 'fixed' 
+                      ? fixedCategoryData 
+                      : typeFilter === 'variable' 
+                        ? variableCategoryData 
+                        : allCategoryData
+                  }
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  onMouseEnter={(_, index) => setActiveIndex(index)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(transaction.date).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2" 
-                        style={{ 
-                          backgroundColor: categoryColors[transaction.category as keyof typeof categoryColors] || '#CBD5E0' 
-                        }}
-                      />
-                      <span className="text-sm text-gray-900 dark:text-gray-200">{transaction.category}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                    {transaction.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400">
-                    -R$ {transaction.amount.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
-                      <button className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </button>
-                      <button className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <Trash2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  {(typeFilter === 'fixed' 
+                      ? fixedCategoryData 
+                      : typeFilter === 'variable' 
+                        ? variableCategoryData 
+                        : allCategoryData
+                  ).map((entry: { name: string, value: number }, index: number) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={categoryColors[entry.name as keyof typeof categoryColors] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value) => `R$ ${Number(value).toFixed(2)}`} 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  }}
+                  itemStyle={{ padding: '4px 0' }}
+                />
+                <Legend 
+                  layout="horizontal" 
+                  align="center"
+                  verticalAlign="bottom"
+                  iconSize={10}
+                  iconType="circle"
+                  wrapperStyle={{ paddingTop: '20px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="mt-4">
+            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Filtrar por tipo:</h4>
+            <div className="flex space-x-2">
+              <button
+                className={`text-sm px-3 py-1 rounded-full ${typeFilter === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
+                onClick={() => setTypeFilter('all')}
+              >
+                Todas
+              </button>
+              <button
+                className={`text-sm px-3 py-1 rounded-full ${typeFilter === 'fixed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
+                onClick={() => setTypeFilter('fixed')}
+              >
+                Fixas
+              </button>
+              <button
+                className={`text-sm px-3 py-1 rounded-full ${typeFilter === 'variable' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
+                onClick={() => setTypeFilter('variable')}
+              >
+                Variáveis
+              </button>
+            </div>
+          </div>
         </div>
         
-        <div className="px-6 py-3 bg-gray-50 dark:bg-gray-900 text-right">
-          <button className="text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-            Ver todas as transações →
-          </button>
-        </div>
-      </div>
-      
-      {/* Gráfico de distribuição de despesas */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Distribuição de Despesas por Categoria</h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                activeIndex={activeIndex}
-                activeShape={renderActiveShape}
-                data={
-                  chartType === 'fixed' 
-                    ? fixedCategoryData 
-                    : chartType === 'variable' 
-                      ? variableCategoryData 
-                      : allCategoryData
-                }
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                onMouseEnter={(_, index) => setActiveIndex(index)}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">Despesas Recentes</h3>
+            <div className="flex space-x-2">
+              <button
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 dark:text-gray-400"
+                onClick={() => setShowFilters(!showFilters)}
               >
-                {(chartType === 'fixed' 
-                    ? fixedCategoryData 
-                    : chartType === 'variable' 
-                      ? variableCategoryData 
-                      : allCategoryData
-                ).map((entry: { name: string, value: number }, index: number) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={categoryColors[entry.name as keyof typeof categoryColors] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
-                  />
+                <Filter className="w-4 h-4" />
+              </button>
+              <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 dark:text-gray-400">
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Filtros */}
+          {showFilters && (
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+              <div className="grid grid-cols-2 md:flex md:space-x-4">
+                <div className="mb-3 md:mb-0">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    Categoria
+                  </label>
+                  <select
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                  >
+                    <option value="Todas">Todas</option>
+                    {Object.keys(categoryColors).map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Tabela de despesas */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Descrição
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Categoria
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Data
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Pagamento
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Valor
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                {filteredTransactions.map((transaction) => (
+                  <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {transaction.description}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {transaction.expenseType === 'fixed' ? 'Fixa' : 'Variável'}
+                            {transaction.recurrent && ' • Recorrente'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                            style={{ backgroundColor: `${categoryColors[transaction.category as keyof typeof categoryColors]}20`, 
+                                    color: categoryColors[transaction.category as keyof typeof categoryColors] }}>
+                        {transaction.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-1">
+                        {getPaymentMethodIcon(transaction.paymentMethod)}
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {transaction.paymentMethod === 'credit' && transaction.creditCardId
+                            ? getCreditCardById(transaction.creditCardId)?.name
+                            : transaction.paymentMethod === 'pix'
+                            ? 'Pix'
+                            : transaction.paymentMethod === 'debit'
+                            ? 'Débito'
+                            : transaction.paymentMethod === 'transfer'
+                            ? 'Transferência'
+                            : 'Dinheiro'
+                          }
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400">
+                      - R$ {transaction.amount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value) => `R$ ${Number(value).toFixed(2)}`} 
-                contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}
-                itemStyle={{ padding: '4px 0' }}
-              />
-              <Legend 
-                layout="horizontal" 
-                align="center"
-                verticalAlign="bottom"
-                iconSize={10}
-                iconType="circle"
-                wrapperStyle={{ paddingTop: '20px' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       
-      {/* Modal para adicionar nova despesa */}
+      {/* Modal de nova despesa */}
       {showNewExpenseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg animate-fade-in-up">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Adicionar Nova Despesa
-              </h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nova Despesa</h3>
               <button 
                 onClick={() => setShowNewExpenseModal(false)}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
@@ -551,177 +660,175 @@ export function Expenses() {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Descrição
+                </label>
+                <input
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder="Ex: Compras do supermercado"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Descrição
+                    Valor (R$)
                   </label>
                   <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
                     onChange={handleFormChange}
                     required
+                    min="0.01"
+                    step="0.01"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Ex: Compras do supermercado"
+                    placeholder="0,00"
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Valor (R$)
-                    </label>
-                    <input
-                      type="number"
-                      name="amount"
-                      value={formData.amount}
-                      onChange={handleFormChange}
-                      required
-                      min="0.01"
-                      step="0.01"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="0,00"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Data
-                    </label>
-                    <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleFormChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Categoria
+                    Data
                   </label>
-                  <select
-                    name="category"
-                    value={formData.category}
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
                     onChange={handleFormChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    {availableCategories.filter(cat => cat !== 'Todas').map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                    <option value="other">Outra (especificar)</option>
-                  </select>
+                  />
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Tipo de Despesa
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Categoria
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {availableCategories.filter(cat => cat !== 'Todas').map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                  <option value="other">Outra (especificar)</option>
+                </select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tipo de Despesa
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="expenseType"
+                        value="fixed"
+                        checked={formData.expenseType === 'fixed'}
+                        onChange={handleFormChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Fixa</span>
                     </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="expenseType"
-                          value="fixed"
-                          checked={formData.expenseType === 'fixed'}
-                          onChange={handleFormChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Fixa</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="expenseType"
-                          value="variable"
-                          checked={formData.expenseType === 'variable'}
-                          onChange={handleFormChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Variável</span>
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Recorrência
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="expenseType"
+                        value="variable"
+                        checked={formData.expenseType === 'variable'}
+                        onChange={handleFormChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Variável</span>
                     </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="recurrent"
-                          value="yes"
-                          checked={formData.recurrent}
-                          onChange={handleFormChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Recorrente</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="recurrent"
-                          value="no"
-                          checked={!formData.recurrent}
-                          onChange={handleFormChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Única</span>
-                      </label>
-                    </div>
                   </div>
                 </div>
-                
-                {formData.recurrent && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Frequência
-                    </label>
-                    <select
-                      name="frequency"
-                      value={formData.frequency}
-                      onChange={handleFormChange}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    >
-                      <option value="monthly">Mensal</option>
-                      <option value="weekly">Semanal</option>
-                      <option value="yearly">Anual</option>
-                      <option value="one-time">Única vez</option>
-                    </select>
-                  </div>
-                )}
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Método de Pagamento
+                    Recorrência
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="recurrent"
+                        value="yes"
+                        checked={formData.recurrent}
+                        onChange={handleFormChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Recorrente</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="recurrent"
+                        value="no"
+                        checked={!formData.recurrent}
+                        onChange={handleFormChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Única</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+              {formData.recurrent && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Frequência
                   </label>
                   <select
-                    id="paymentMethod"
-                    name="paymentMethod"
-                    value={formData.paymentMethod}
+                    name="frequency"
+                    value={formData.frequency}
                     onChange={handleFormChange}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
-                    <option value="cash">Dinheiro</option>
-                    <option value="debit">Cartão de Débito</option>
-                    <option value="credit">Cartão de Crédito</option>
-                    <option value="pix">PIX</option>
-                    <option value="transfer">Transferência Bancária</option>
-                    <option value="boleto">Boleto</option>
+                    <option value="monthly">Mensal</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="yearly">Anual</option>
+                    <option value="one-time">Única vez</option>
                   </select>
                 </div>
-                
-                <div id="creditCardSelect" style={{ display: formData.paymentMethod === 'credit' ? 'block' : 'none' }}>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Método de Pagamento
+                </label>
+                <select
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="cash">Dinheiro</option>
+                  <option value="debit">Cartão de Débito</option>
+                  <option value="credit">Cartão de Crédito</option>
+                  <option value="pix">Pix</option>
+                  <option value="transfer">Transferência</option>
+                </select>
+              </div>
+              
+              {formData.paymentMethod === 'credit' && (
+                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Cartão de Crédito
                   </label>
@@ -729,73 +836,75 @@ export function Expenses() {
                     name="creditCardId"
                     value={formData.creditCardId}
                     onChange={handleFormChange}
+                    required
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Selecione um cartão</option>
                     {creditCards.map(card => (
-                      <option key={card.id} value={card.id}>{card.name}</option>
+                      <option key={card.id} value={card.id}>
+                        {card.name} (*{card.lastDigits})
+                      </option>
                     ))}
-                    <option value="new">Adicionar Novo Cartão...</option>
                   </select>
                 </div>
-                
-                <div id="dueDateInput" style={{ display: formData.paymentMethod !== 'credit' && !['pix', 'transfer', 'debit'].includes(formData.paymentMethod) ? 'block' : 'none' }}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Data de Vencimento
+              )}
+              
+              <div id="dueDateInput" style={{ display: formData.paymentMethod !== 'credit' && !['pix', 'transfer', 'debit'].includes(formData.paymentMethod) ? 'block' : 'none' }}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Data de Vencimento
+                </label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  value={formData.dueDate}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Status de Pagamento
+                </label>
+                <div className="flex space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="paymentStatus"
+                      value="paid"
+                      checked={formData.paymentStatus === 'paid'}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pago</span>
                   </label>
-                  <input
-                    type="date"
-                    name="dueDate"
-                    value={formData.dueDate}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Status de Pagamento
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="paymentStatus"
+                      value="pending"
+                      checked={formData.paymentStatus === 'pending'}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pendente</span>
                   </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentStatus"
-                        value="paid"
-                        checked={formData.paymentStatus === 'paid'}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pago</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentStatus"
-                        value="pending"
-                        checked={formData.paymentStatus === 'pending'}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pendente</span>
-                    </label>
-                  </div>
                 </div>
               </div>
               
-              <div className="mt-6 flex justify-end space-x-3">
+              <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                   type="button"
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => setShowNewExpenseModal(false)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Adicionar Despesa
+                  Salvar
                 </button>
               </div>
             </form>
