@@ -234,6 +234,8 @@ export function Expenses() {
     paymentStatus: 'paid'
   });
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const totalBudget = budgetCategories.reduce((sum, cat) => sum + cat.allocated, 0) || 5000;
 
   // Filtragem de transações
@@ -296,6 +298,10 @@ export function Expenses() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevenir múltiplos envios
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
     const transaction: Omit<Transaction, 'id'> = {
       description: formData.description,
       amount: parseFloat(formData.amount),
@@ -311,9 +317,15 @@ export function Expenses() {
       dueDate: formData.dueDate || undefined
     };
     
-    addTransaction(transaction);
-    resetForm();
-    setShowNewExpenseModal(false);
+    try {
+      addTransaction(transaction);
+      resetForm();
+      setShowNewExpenseModal(false);
+    } catch (error) {
+      console.error('Erro ao adicionar transação:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // Gerenciar mudanças no formulário
@@ -345,28 +357,34 @@ export function Expenses() {
   
   // Atualizar exibição de campos com base no método de pagamento
   useEffect(() => {
-    const creditCardField = document.getElementById('creditCardSelect')?.parentElement;
-    const debitCardField = document.getElementById('debitCardSelect')?.parentElement;
-    const dueDateField = document.getElementById('dueDateInput')?.parentElement;
+    // Verificar se o modal está aberto antes de tentar manipular os elementos
+    if (!showNewExpenseModal) return;
     
-    // Esconder todos os campos de cartão por padrão
-    if (creditCardField) creditCardField.style.display = 'none';
-    if (debitCardField) debitCardField.style.display = 'none';
-    
-    // Mostrar o campo de cartão correspondente ao método selecionado
-    if (formData.paymentMethod === 'credit') {
-      if (creditCardField) creditCardField.style.display = 'block';
-    } else if (formData.paymentMethod === 'debit') {
-      if (debitCardField) debitCardField.style.display = 'block';
-    }
-    
-    // Controlar visibilidade do campo de data de vencimento
-    if (formData.paymentMethod === 'credit' || ['pix', 'transfer', 'debit'].includes(formData.paymentMethod)) {
-      if (dueDateField) dueDateField.style.display = 'none';
-    } else {
-      if (dueDateField) dueDateField.style.display = 'block';
-    }
-  }, [formData.paymentMethod]);
+    // Usando setTimeout para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      const creditCardField = document.getElementById('creditCardSelect')?.parentElement;
+      const debitCardField = document.getElementById('debitCardSelect')?.parentElement;
+      const dueDateField = document.getElementById('dueDateInput')?.parentElement;
+      
+      // Esconder todos os campos de cartão por padrão
+      if (creditCardField) creditCardField.style.display = 'none';
+      if (debitCardField) debitCardField.style.display = 'none';
+      
+      // Mostrar o campo de cartão correspondente ao método selecionado
+      if (formData.paymentMethod === 'credit') {
+        if (creditCardField) creditCardField.style.display = 'block';
+      } else if (formData.paymentMethod === 'debit') {
+        if (debitCardField) debitCardField.style.display = 'block';
+      }
+      
+      // Controlar visibilidade do campo de data de vencimento
+      if (formData.paymentMethod === 'credit' || ['pix', 'transfer', 'debit'].includes(formData.paymentMethod)) {
+        if (dueDateField) dueDateField.style.display = 'none';
+      } else {
+        if (dueDateField) dueDateField.style.display = 'block';
+      }
+    }, 0);
+  }, [formData.paymentMethod, showNewExpenseModal]);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -632,8 +650,17 @@ export function Expenses() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400">
-                      - R$ {transaction.amount.toFixed(2)}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <span className={`text-sm font-medium ${transaction.paymentStatus === 'pending' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
+                          - R$ {transaction.amount.toFixed(2)}
+                        </span>
+                        {transaction.paymentStatus === 'pending' && (
+                          <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+                            Pendente
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">

@@ -151,8 +151,11 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     
     // Lógica para processar pagamentos
     if (transaction.type === 'expense') {
-      // Se for PIX ou dinheiro ou transferência, debitar do valor de renda
-      if (transaction.paymentMethod === 'pix' || transaction.paymentMethod === 'cash' || transaction.paymentMethod === 'transfer') {
+      // Verificar se o pagamento está pendente
+      const isPending = transaction.paymentStatus === 'pending';
+      
+      // Se for PIX ou dinheiro ou transferência, debitar do valor de renda apenas se não for pendente
+      if ((transaction.paymentMethod === 'pix' || transaction.paymentMethod === 'cash' || transaction.paymentMethod === 'transfer') && !isPending) {
         // Atualizar o totalBalance no resumo
         setSummary(prev => ({
           ...prev,
@@ -170,6 +173,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
           
           // Se for cartão de crédito
           if (card.type === 'credit' && transaction.paymentMethod === 'credit') {
+            // Apenas atualizar o saldo do cartão se não for pendente
+            // Para cartões de crédito, as despesas são contabilizadas mesmo que pendentes
             updatedCards = creditCards.map(c => {
               if (c.id === transaction.creditCardId) {
                 // Atualizar saldo e limite disponível do cartão de crédito
@@ -186,8 +191,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
           }
           
           // Se for cartão de débito
-          if (card.type === 'debit' && transaction.paymentMethod === 'debit') {
-            // Atualizar o saldo disponível do cartão de débito
+          if (card.type === 'debit' && transaction.paymentMethod === 'debit' && !isPending) {
+            // Apenas atualizar o saldo disponível se não for pendente
             updatedCards = creditCards.map(c => {
               if (c.id === transaction.creditCardId) {
                 // Atualizar o limite disponível do cartão de débito
@@ -209,6 +214,14 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
             }));
           }
         }
+      }
+      
+      // Atualizar pendingBills se o pagamento estiver pendente
+      if (isPending) {
+        setSummary(prev => ({
+          ...prev,
+          pendingBills: prev.pendingBills + transaction.amount
+        }));
       }
     }
     
@@ -308,27 +321,30 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     // # Calcula receita total somando todas as fontes de renda
     const totalIncome = incomeSources.reduce((sum, source) => sum + source.amount, 0);
     
-    // # Calcula despesas fixas somando transações do tipo despesa fixa
-    const fixedExpenses = transactions
-      .filter(t => t.type === 'expense' && t.expenseType === 'fixed')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    // # Calcula despesas variáveis somando transações do tipo despesa variável  
-    const variableExpenses = transactions
-      .filter(t => t.type === 'expense' && t.expenseType === 'variable')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    // # Calcula despesas de cartão de crédito  
-    const creditCardExpenses = transactions
-      .filter(t => t.type === 'expense' && t.paymentMethod === 'credit')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    // # Calcula contas pendentes  
+    // # Contas pendentes
     const pendingBills = transactions
       .filter(t => t.type === 'expense' && t.paymentStatus === 'pending')
       .reduce((sum, t) => sum + t.amount, 0);
     
-    // # Calcula dinheiro restante (receita - despesas)
+    // # Filtra transações que não são pendentes (apenas as pagas)
+    const paidTransactions = transactions.filter(t => t.paymentStatus !== 'pending');
+    
+    // # Calcula despesas fixas somando transações pagas do tipo despesa fixa
+    const fixedExpenses = paidTransactions
+      .filter(t => t.type === 'expense' && t.expenseType === 'fixed')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // # Calcula despesas variáveis somando transações pagas do tipo despesa variável  
+    const variableExpenses = paidTransactions
+      .filter(t => t.type === 'expense' && t.expenseType === 'variable')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // # Calcula despesas de cartão de crédito (incluindo pendentes)
+    const creditCardExpenses = transactions
+      .filter(t => t.type === 'expense' && t.paymentMethod === 'credit')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    // # Calcula dinheiro restante (receita - despesas pagas)
     const remainingMoney = totalIncome - fixedExpenses - variableExpenses;
     const totalBalance = remainingMoney;
     
