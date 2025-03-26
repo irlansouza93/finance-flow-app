@@ -307,7 +307,7 @@ export function Expenses() {
       frequency: formData.recurrent ? formData.frequency as 'monthly' | 'weekly' | 'yearly' | 'one-time' : undefined,
       paymentMethod: formData.paymentMethod as Transaction['paymentMethod'],
       paymentStatus: formData.paymentStatus as 'pending' | 'paid',
-      creditCardId: formData.paymentMethod === 'credit' ? formData.creditCardId : undefined,
+      creditCardId: (formData.paymentMethod === 'credit' || formData.paymentMethod === 'debit') ? formData.creditCardId : undefined,
       dueDate: formData.dueDate || undefined
     };
     

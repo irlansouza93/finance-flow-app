@@ -151,8 +151,8 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
     
     // Lógica para processar pagamentos
     if (transaction.type === 'expense') {
-      // Se for PIX, debitar do valor de renda
-      if (transaction.paymentMethod === 'pix') {
+      // Se for PIX ou dinheiro ou transferência, debitar do valor de renda
+      if (transaction.paymentMethod === 'pix' || transaction.paymentMethod === 'cash' || transaction.paymentMethod === 'transfer') {
         // Atualizar o totalBalance no resumo
         setSummary(prev => ({
           ...prev,
@@ -181,10 +181,26 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
               }
               return c;
             });
+            
+            setCreditCards(updatedCards);
           }
           
           // Se for cartão de débito
           if (card.type === 'debit' && transaction.paymentMethod === 'debit') {
+            // Atualizar o saldo disponível do cartão de débito
+            updatedCards = creditCards.map(c => {
+              if (c.id === transaction.creditCardId) {
+                // Atualizar o limite disponível do cartão de débito
+                return {
+                  ...c,
+                  availableLimit: c.availableLimit - transaction.amount
+                };
+              }
+              return c;
+            });
+            
+            setCreditCards(updatedCards);
+            
             // Atualizar o totalBalance no resumo
             setSummary(prev => ({
               ...prev,
@@ -192,8 +208,6 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
               remainingMoney: prev.remainingMoney - transaction.amount
             }));
           }
-          
-          setCreditCards(updatedCards);
         }
       }
     }
