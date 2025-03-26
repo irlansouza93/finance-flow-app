@@ -161,21 +161,40 @@ export const FinanceProvider: React.FC<FinanceProviderProps> = ({ children }) =>
         }));
       }
       
-      // Se for cartão de crédito, debitar do limite do cartão
-      if (transaction.paymentMethod === 'credit' && transaction.creditCardId) {
-        const updatedCards = creditCards.map(card => {
-          if (card.id === transaction.creditCardId) {
-            // Atualizar saldo e limite disponível do cartão
-            return {
-              ...card,
-              currentBalance: card.currentBalance + transaction.amount,
-              availableLimit: card.limit - (card.currentBalance + transaction.amount)
-            };
-          }
-          return card;
-        });
+      // Se for cartão (crédito ou débito)
+      if (transaction.creditCardId) {
+        const card = creditCards.find(c => c.id === transaction.creditCardId);
         
-        setCreditCards(updatedCards);
+        if (card) {
+          let updatedCards = [...creditCards];
+          
+          // Se for cartão de crédito
+          if (card.type === 'credit' && transaction.paymentMethod === 'credit') {
+            updatedCards = creditCards.map(c => {
+              if (c.id === transaction.creditCardId) {
+                // Atualizar saldo e limite disponível do cartão de crédito
+                return {
+                  ...c,
+                  currentBalance: c.currentBalance + transaction.amount,
+                  availableLimit: c.limit - (c.currentBalance + transaction.amount)
+                };
+              }
+              return c;
+            });
+          }
+          
+          // Se for cartão de débito
+          if (card.type === 'debit' && transaction.paymentMethod === 'debit') {
+            // Atualizar o totalBalance no resumo
+            setSummary(prev => ({
+              ...prev,
+              totalBalance: prev.totalBalance - transaction.amount,
+              remainingMoney: prev.remainingMoney - transaction.amount
+            }));
+          }
+          
+          setCreditCards(updatedCards);
+        }
       }
     }
     

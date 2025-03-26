@@ -181,7 +181,7 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-// Função para obter o cartão de crédito pelo ID
+// Função para obter o cartão pelo ID
 const getCreditCardById = (cardId: string) => {
   return creditCards.find(card => card.id === cardId);
 };
@@ -346,14 +346,21 @@ export function Expenses() {
   // Atualizar exibição de campos com base no método de pagamento
   useEffect(() => {
     const creditCardField = document.getElementById('creditCardSelect')?.parentElement;
+    const debitCardField = document.getElementById('debitCardSelect')?.parentElement;
     const dueDateField = document.getElementById('dueDateInput')?.parentElement;
     
+    // Esconder todos os campos de cartão por padrão
+    if (creditCardField) creditCardField.style.display = 'none';
+    if (debitCardField) debitCardField.style.display = 'none';
+    
+    // Mostrar o campo de cartão correspondente ao método selecionado
     if (formData.paymentMethod === 'credit') {
       if (creditCardField) creditCardField.style.display = 'block';
-    } else {
-      if (creditCardField) creditCardField.style.display = 'none';
+    } else if (formData.paymentMethod === 'debit') {
+      if (debitCardField) debitCardField.style.display = 'block';
     }
     
+    // Controlar visibilidade do campo de data de vencimento
     if (formData.paymentMethod === 'credit' || ['pix', 'transfer', 'debit'].includes(formData.paymentMethod)) {
       if (dueDateField) dueDateField.style.display = 'none';
     } else {
@@ -828,7 +835,7 @@ export function Expenses() {
               </div>
               
               {formData.paymentMethod === 'credit' && (
-                <div>
+                <div id="creditCardSelect">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Cartão de Crédito
                   </label>
@@ -840,7 +847,29 @@ export function Expenses() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Selecione um cartão</option>
-                    {creditCards.map(card => (
+                    {creditCards.filter(card => card.type === 'credit').map(card => (
+                      <option key={card.id} value={card.id}>
+                        {card.name} (*{card.lastDigits})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              {formData.paymentMethod === 'debit' && (
+                <div id="debitCardSelect">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Cartão de Débito
+                  </label>
+                  <select
+                    name="creditCardId"
+                    value={formData.creditCardId}
+                    onChange={handleFormChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="">Selecione um cartão</option>
+                    {creditCards.filter(card => card.type === 'debit').map(card => (
                       <option key={card.id} value={card.id}>
                         {card.name} (*{card.lastDigits})
                       </option>

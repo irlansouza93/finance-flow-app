@@ -118,7 +118,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           />
           <NavItem
             icon={<CreditCard className="w-5 h-5" />}
-            label="Cartões de Crédito"
+            label="Cartões"
             active={activeSection === 'credit-cards'}
             onClick={() => onSectionChange('credit-cards')}
           />

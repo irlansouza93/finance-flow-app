@@ -8,6 +8,8 @@ const routeNames: Record<string, string> = {
   budget: 'Orçamento',
   goals: 'Metas',
   chat: 'Chat IA',
+  'credit-cards': 'Cartões',
+  income: 'Renda'
 };
 
 export function Breadcrumb() {

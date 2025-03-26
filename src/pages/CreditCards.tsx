@@ -48,7 +48,8 @@ export function CreditCards() {
     closingDay: '',
     dueDay: '',
     color: '#8A05BE',
-    brand: 'mastercard'
+    brand: 'mastercard',
+    type: 'credit' as 'credit' | 'debit'
   });
 
   // Limpar formulário quando modal é aberto/fechado
@@ -64,7 +65,8 @@ export function CreditCards() {
         closingDay: '',
         dueDay: '',
         color: '#8A05BE',
-        brand: 'mastercard'
+        brand: 'mastercard',
+        type: 'credit'
       });
       setSelectedCard(null);
     }
@@ -83,7 +85,8 @@ export function CreditCards() {
         closingDay: selectedCard.closingDay.toString(),
         dueDay: selectedCard.dueDay.toString(),
         color: selectedCard.color || '#8A05BE',
-        brand: selectedCard.brand || 'mastercard'
+        brand: selectedCard.brand || 'mastercard',
+        type: selectedCard.type || 'credit'
       });
       setShowAddCardModal(true);
     }
@@ -98,6 +101,7 @@ export function CreditCards() {
     const cardData = {
       name: formData.name,
       lastDigits,
+      type: formData.type,
       limit: parseFloat(formData.limit),
       closingDay: parseInt(formData.closingDay),
       dueDay: parseInt(formData.dueDay),
@@ -176,7 +180,7 @@ export function CreditCards() {
       {/* Cabeçalho com ações */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Cartões de Crédito
+          Cartões
         </h2>
         <button 
           className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
@@ -192,7 +196,9 @@ export function CreditCards() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center shadow-md border border-gray-100 dark:border-gray-700">
           <CreditCard className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
           <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">Nenhum cartão cadastrado</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Adicione seu primeiro cartão de crédito para acompanhar suas despesas.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Adicione seus cartões de crédito e débito para gerenciar melhor seus gastos.
+          </p>
           <button 
             className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all"
             onClick={() => setShowAddCardModal(true)}
@@ -220,7 +226,12 @@ export function CreditCards() {
                     style={{ backgroundColor: card.color || '#8A05BE' }}
                   >
                     <div className="flex justify-between items-start">
-                      <div className="text-white text-lg font-medium">{card.name}</div>
+                      <div className="flex flex-col">
+                        <div className="text-white text-lg font-medium">{card.name}</div>
+                        <div className="text-white/80 text-xs mt-1 bg-black/20 px-2 py-0.5 rounded-full inline-block">
+                          {card.type === 'credit' ? 'Crédito' : 'Débito'}
+                        </div>
+                      </div>
                       {getBrandIcon(card.brand)}
                     </div>
                     
@@ -241,25 +252,42 @@ export function CreditCards() {
                       </div>
                       
                       <div className="flex justify-between items-end">
-                        <div className="text-white/90 text-sm flex flex-col">
-                          <span>Limite Disponível</span>
-                          <span className="font-bold text-base">{formatCurrency(card.availableLimit)}</span>
-                        </div>
-                        <div className="text-white/90 text-sm flex flex-col items-end">
-                          <span>Limite Total</span>
-                          <span className="font-bold text-base">{formatCurrency(card.limit)}</span>
-                        </div>
+                        {card.type === 'credit' ? (
+                          <>
+                            <div className="text-white/90 text-sm flex flex-col">
+                              <span>Limite Disponível</span>
+                              <span className="font-bold text-base">{formatCurrency(card.availableLimit)}</span>
+                            </div>
+                            <div className="text-white/90 text-sm flex flex-col items-end">
+                              <span>Limite Total</span>
+                              <span className="font-bold text-base">{formatCurrency(card.limit)}</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-white/90 text-sm flex flex-col">
+                              <span>Tipo</span>
+                              <span className="font-bold text-base">Débito</span>
+                            </div>
+                            <div className="text-white/90 text-sm flex flex-col items-end">
+                              <span>Saldo Disponível</span>
+                              <span className="font-bold text-base">{formatCurrency(card.availableLimit)}</span>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* Status da fatura */}
+                {/* Status da fatura para cartões de crédito / Informações para cartões de débito */}
                 <div className={`mt-4 p-4 rounded-lg shadow-md border
-                  ${isAlmostDue ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
+                  ${card.type === 'credit' && isAlmostDue ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'}`}>
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">Fatura atual</h3>
-                    {isAlmostDue && (
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                      {card.type === 'credit' ? 'Fatura atual' : 'Informações do cartão'}
+                    </h3>
+                    {card.type === 'credit' && isAlmostDue && (
                       <div className="flex items-center text-yellow-600 dark:text-yellow-400">
                         <AlertTriangle className="w-4 h-4 mr-1" />
                         <span className="text-xs">Vence em {daysUntilDue} {daysUntilDue === 1 ? 'dia' : 'dias'}</span>
@@ -267,20 +295,32 @@ export function CreditCards() {
                     )}
                   </div>
                   
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      <span>
-                        {billingCycle 
-                          ? `Vence em ${format(billingCycle.dueDate, "dd 'de' MMMM", { locale: ptBR })}`
-                          : 'Sem fatura aberta'
-                        }
-                      </span>
+                  {card.type === 'credit' ? (
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        <span>
+                          {billingCycle 
+                            ? `Vence em ${format(billingCycle.dueDate, "dd 'de' MMMM", { locale: ptBR })}`
+                            : 'Sem fatura aberta'
+                          }
+                        </span>
+                      </div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                        {formatCurrency(billingCycle?.totalAmount || 0)}
+                      </div>
                     </div>
-                    <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      {formatCurrency(billingCycle?.totalAmount || 0)}
+                  ) : (
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                        <DollarSign className="w-4 h-4 mr-1" />
+                        <span>Saldo disponível</span>
+                      </div>
+                      <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(card.availableLimit)}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   
                   <div className="flex space-x-2">
                     <button 
@@ -311,43 +351,68 @@ export function CreditCards() {
                   <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 p-4 animate-fade-in">
                     <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Detalhes do Cartão</h3>
                     
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Fechamento</div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Dia {card.closingDay}</div>
+                    {card.type === 'credit' ? (
+                      <>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Fechamento</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100">Dia {card.closingDay}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Vencimento</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100">Dia {card.dueDay}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Limite Usado</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(card.currentBalance)}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Limite Total</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(card.limit)}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Uso do Limite</div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-1">
+                            <div 
+                              className="h-2.5 rounded-full transition-all duration-500" 
+                              style={{ 
+                                width: `${Math.min(100, (card.currentBalance / card.limit) * 100)}%`,
+                                backgroundColor: 
+                                  (card.currentBalance / card.limit) > 0.8 ? '#EF4444' : 
+                                  (card.currentBalance / card.limit) > 0.6 ? '#F59E0B' : 
+                                  '#10B981'
+                              }} 
+                            />
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {Math.round((card.currentBalance / card.limit) * 100)}% utilizado
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="mb-4">
+                        <div className="flex justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-3">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Saldo Disponível</div>
+                          <div className="font-medium text-green-600 dark:text-green-400">{formatCurrency(card.availableLimit)}</div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Tipo</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100">Cartão de Débito</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Bandeira</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                              <span className="mr-2">{card.brand ? card.brand.charAt(0).toUpperCase() + card.brand.slice(1) : 'Outra'}</span>
+                              <div className="scale-75">{getBrandIcon(card.brand)}</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Vencimento</div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Dia {card.dueDay}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Limite Usado</div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(card.currentBalance)}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Limite Total</div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(card.limit)}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Uso do Limite</div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-1">
-                        <div 
-                          className="h-2.5 rounded-full transition-all duration-500" 
-                          style={{ 
-                            width: `${Math.min(100, (card.currentBalance / card.limit) * 100)}%`,
-                            backgroundColor: 
-                              (card.currentBalance / card.limit) > 0.8 ? '#EF4444' : 
-                              (card.currentBalance / card.limit) > 0.6 ? '#F59E0B' : 
-                              '#10B981'
-                          }} 
-                        />
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {Math.round((card.currentBalance / card.limit) * 100)}% utilizado
-                      </div>
-                    </div>
+                    )}
                     
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2 mt-4">Lançamentos Recentes</h4>
                     {getCardTransactions(card.id).length === 0 ? (
@@ -427,6 +492,36 @@ export function CreditCards() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tipo de Cartão
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="cardType"
+                        value="credit"
+                        checked={formData.type === 'credit'}
+                        onChange={() => setFormData({...formData, type: 'credit'})}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Crédito</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="cardType"
+                        value="debit"
+                        checked={formData.type === 'debit'}
+                        onChange={() => setFormData({...formData, type: 'debit'})}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Débito</span>
+                    </label>
+                  </div>
                 </div>
                 
                 <div>

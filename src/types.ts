@@ -56,13 +56,14 @@ export interface IncomeSource {
 }
 
 /**
- * # Interface de Cartão de Crédito
- * Representa um cartão de crédito com suas informações e saldo
+ * # Interface de Cartão
+ * Representa um cartão (crédito ou débito) com suas informações e saldo
  */
 export interface CreditCard {
   id: string;            // # ID único do cartão
   name: string;          // # Nome do cartão
   lastDigits: string;    // # Últimos 4 dígitos do cartão
+  type: 'credit' | 'debit'; // # Tipo do cartão: crédito ou débito
   limit: number;         // # Limite total do cartão
   closingDay: number;    // # Dia do fechamento da fatura (1-31)
   dueDay: number;        // # Dia do vencimento da fatura (1-31)
@@ -71,6 +72,7 @@ export interface CreditCard {
   color?: string;         // # Cor representativa do cartão na UI
   transactions?: Transaction[]; // # Transações associadas ao cartão
   brand?: 'visa' | 'mastercard' | 'amex' | 'elo' | 'hipercard' | 'other'; // # Bandeira do cartão
+  accountId?: string;     // # ID da conta bancária associada (para cartões de débito)
 }
 
 /**
