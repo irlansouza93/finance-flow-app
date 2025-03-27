@@ -386,6 +386,301 @@ export function Expenses() {
     }, 0);
   }, [formData.paymentMethod, showNewExpenseModal]);
 
+  // Função para renderizar o modal de nova despesa
+  const renderExpenseModal = () => {
+    if (!showNewExpenseModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nova Despesa</h3>
+            <button 
+              onClick={() => setShowNewExpenseModal(false)}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+            </button>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descrição
+              </label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="Ex: Compras do supermercado"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Valor (R$)
+                </label>
+                <input
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleFormChange}
+                  required
+                  min="0.01"
+                  step="0.01"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder="0,00"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Data
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Categoria
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Selecione uma categoria</option>
+                {availableCategories.filter(cat => cat !== 'Todas').map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+                <option value="other">Outra (especificar)</option>
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tipo de Despesa
+                </label>
+                <div className="flex space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="expenseType"
+                      value="fixed"
+                      checked={formData.expenseType === 'fixed'}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Fixa</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="expenseType"
+                      value="variable"
+                      checked={formData.expenseType === 'variable'}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Variável</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Recorrência
+                </label>
+                <div className="flex space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="recurrent"
+                      value="yes"
+                      checked={formData.recurrent}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Recorrente</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="recurrent"
+                      value="no"
+                      checked={!formData.recurrent}
+                      onChange={handleFormChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Única</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            {formData.recurrent && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Frequência
+                </label>
+                <select
+                  name="frequency"
+                  value={formData.frequency}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="monthly">Mensal</option>
+                  <option value="weekly">Semanal</option>
+                  <option value="yearly">Anual</option>
+                  <option value="one-time">Única vez</option>
+                </select>
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Método de Pagamento
+              </label>
+              <select
+                name="paymentMethod"
+                value={formData.paymentMethod}
+                onChange={handleFormChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                <option value="cash">Dinheiro</option>
+                <option value="debit">Cartão de Débito</option>
+                <option value="credit">Cartão de Crédito</option>
+                <option value="pix">Pix</option>
+                <option value="transfer">Transferência</option>
+              </select>
+            </div>
+            
+            {formData.paymentMethod === 'credit' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Cartão de Crédito
+                </label>
+                <select
+                  name="creditCardId"
+                  value={formData.creditCardId}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Selecione um cartão</option>
+                  {creditCards.filter(card => card.type === 'credit').map(card => (
+                    <option key={card.id} value={card.id}>
+                      {card.name} (*{card.lastDigits})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            {formData.paymentMethod === 'debit' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Cartão de Débito
+                </label>
+                <select
+                  name="creditCardId"
+                  value={formData.creditCardId}
+                  onChange={handleFormChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Selecione um cartão</option>
+                  {creditCards.filter(card => card.type === 'debit').map(card => (
+                    <option key={card.id} value={card.id}>
+                      {card.name} (*{card.lastDigits})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            {!(formData.paymentMethod === 'credit' || ['pix', 'transfer', 'debit'].includes(formData.paymentMethod)) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Data de Vencimento
+                </label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  value={formData.dueDate}
+                  onChange={handleFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Status de Pagamento
+              </label>
+              <div className="flex space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentStatus"
+                    value="paid"
+                    checked={formData.paymentStatus === 'paid'}
+                    onChange={handleFormChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pago</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentStatus"
+                    value="pending"
+                    checked={formData.paymentStatus === 'pending'}
+                    onChange={handleFormChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pendente</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={() => setShowNewExpenseModal(false)}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`px-4 py-2 bg-blue-600 text-white rounded-lg ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <Breadcrumb />
@@ -681,292 +976,7 @@ export function Expenses() {
       </div>
       
       {/* Modal de nova despesa */}
-      {showNewExpenseModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nova Despesa</h3>
-              <button 
-                onClick={() => setShowNewExpenseModal(false)}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Descrição
-                </label>
-                <input
-                  type="text"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Ex: Compras do supermercado"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Valor (R$)
-                  </label>
-                  <input
-                    type="number"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={handleFormChange}
-                    required
-                    min="0.01"
-                    step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Data
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleFormChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Categoria
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Selecione uma categoria</option>
-                  {availableCategories.filter(cat => cat !== 'Todas').map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                  <option value="other">Outra (especificar)</option>
-                </select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Tipo de Despesa
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="expenseType"
-                        value="fixed"
-                        checked={formData.expenseType === 'fixed'}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Fixa</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="expenseType"
-                        value="variable"
-                        checked={formData.expenseType === 'variable'}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Variável</span>
-                    </label>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Recorrência
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="recurrent"
-                        value="yes"
-                        checked={formData.recurrent}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Recorrente</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="recurrent"
-                        value="no"
-                        checked={!formData.recurrent}
-                        onChange={handleFormChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Única</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              
-              {formData.recurrent && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Frequência
-                  </label>
-                  <select
-                    name="frequency"
-                    value={formData.frequency}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="monthly">Mensal</option>
-                    <option value="weekly">Semanal</option>
-                    <option value="yearly">Anual</option>
-                    <option value="one-time">Única vez</option>
-                  </select>
-                </div>
-              )}
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Método de Pagamento
-                </label>
-                <select
-                  name="paymentMethod"
-                  value={formData.paymentMethod}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="cash">Dinheiro</option>
-                  <option value="debit">Cartão de Débito</option>
-                  <option value="credit">Cartão de Crédito</option>
-                  <option value="pix">Pix</option>
-                  <option value="transfer">Transferência</option>
-                </select>
-              </div>
-              
-              {formData.paymentMethod === 'credit' && (
-                <div id="creditCardSelect">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Cartão de Crédito
-                  </label>
-                  <select
-                    name="creditCardId"
-                    value={formData.creditCardId}
-                    onChange={handleFormChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="">Selecione um cartão</option>
-                    {creditCards.filter(card => card.type === 'credit').map(card => (
-                      <option key={card.id} value={card.id}>
-                        {card.name} (*{card.lastDigits})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              
-              {formData.paymentMethod === 'debit' && (
-                <div id="debitCardSelect">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Cartão de Débito
-                  </label>
-                  <select
-                    name="creditCardId"
-                    value={formData.creditCardId}
-                    onChange={handleFormChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value="">Selecione um cartão</option>
-                    {creditCards.filter(card => card.type === 'debit').map(card => (
-                      <option key={card.id} value={card.id}>
-                        {card.name} (*{card.lastDigits})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              
-              <div id="dueDateInput" style={{ display: formData.paymentMethod !== 'credit' && !['pix', 'transfer', 'debit'].includes(formData.paymentMethod) ? 'block' : 'none' }}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Data de Vencimento
-                </label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={formData.dueDate}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Status de Pagamento
-                </label>
-                <div className="flex space-x-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="paymentStatus"
-                      value="paid"
-                      checked={formData.paymentStatus === 'paid'}
-                      onChange={handleFormChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pago</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      name="paymentStatus"
-                      value="pending"
-                      checked={formData.paymentStatus === 'pending'}
-                      onChange={handleFormChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Pendente</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  type="button"
-                  onClick={() => setShowNewExpenseModal(false)}
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Salvar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {renderExpenseModal()}
     </div>
   );
 }
