@@ -105,7 +105,8 @@ const creditCards: CreditCardType[] = [
     dueDay: 22,
     currentBalance: 1500,
     availableLimit: 3500,
-    color: '#9C44DC'
+    color: '#9C44DC',
+    type: 'credit'
   },
   {
     id: '2',
@@ -116,7 +117,8 @@ const creditCards: CreditCardType[] = [
     dueDay: 17,
     currentBalance: 2500,
     availableLimit: 5500,
-    color: '#EC7000'
+    color: '#EC7000',
+    type: 'credit'
   }
 ];
 
